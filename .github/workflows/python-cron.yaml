@@ -1,0 +1,59 @@
+name: Python 脚本定时任务
+
+on:
+  schedule:
+    - cron: "1 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: 🔍 检出
+        uses: actions/checkout@v5
+
+      - name: 🚀 安装 uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: 🐍 设置 Python 环境
+        run: uv python install 3.11
+
+      - name: 📦 安装依赖
+        run: uv sync --frozen
+
+      - name: ▶️ 运行脚本
+        run: |
+          start_time=$(date +%s)
+          cd gold && uv run python -u momentum.py 2>&1 | tee ../run.log
+          exit_code=${PIPESTATUS[0]}
+          echo "执行时间: $(( $(date +%s) - start_time )) 秒"
+          exit $exit_code
+
+      - name: 📤 推送文件到目标仓库
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git clone --depth 1 https://github.com/chenzt2020/chenzt2020.github.io.git target-repo
+
+          mkdir -p target-repo/html/gold/
+          cp gold/momentum.html target-repo/html/gold/
+
+          cd target-repo
+          git add html/gold/momentum.html
+          git diff --staged --quiet && echo "没有文件变更，跳过提交" || (
+            git commit -m "Update momentum.html - $(date '+%Y-%m-%d %H:%M:%S')"
+            git push https://${{ secrets.TARGET_REPO_TOKEN }}@github.com/chenzt2020/chenzt2020.github.io.git
+          )
+
+      - name: 🚚 上传运行日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quant-gold-output-${{ github.run_id }}
+          path: run.log
