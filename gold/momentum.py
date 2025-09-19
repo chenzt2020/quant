@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from bokeh.embed import file_html
 from bokeh.layouts import column
-from bokeh.models import CrosshairTool, HoverTool
+from bokeh.models import CrosshairTool, Div, HoverTool
 from bokeh.plotting import figure
 from bokeh.resources import CDN
 from pandas_market_calendars import get_calendar
@@ -13,6 +13,12 @@ def get_stock_data(code):
     df = ak.fund_etf_hist_em(symbol=code, adjust="hfq").sort_values("日期")
     df["日期"] = pd.to_datetime(df["日期"])
     return df["收盘"].to_numpy(), df["日期"].to_numpy()
+
+
+def get_stock_data_sina(code):
+    df = ak.fund_etf_hist_sina(symbol=code).sort_values("date")
+    df["date"] = pd.to_datetime(df["date"])
+    return df["close"].to_numpy(), df["date"].to_numpy()
 
 
 def annual_return(v, annual_days=244):
@@ -73,8 +79,8 @@ def momentum_strategy(values, n, print_log=False):
     if print_log:
         print(
             f"momentum({n}):\n"
-            f"年化收益: {ann_ret:.2%} 最大回撤: {mdd:.2%} "
-            f"卡玛比率: {calmar_ratio:.2f} 夏普比率: {sharpe_ratio:.2f} "
+            f"年化收益: {ann_ret:.2%} 最大回撤: {mdd:.2%}\n"
+            f"卡玛比率: {calmar_ratio:.2f} 夏普比率: {sharpe_ratio:.2f}\n"
             f"交易次数: {trade_times} 胜率: {win_rate:.2%}"
         )
     return (
@@ -86,7 +92,7 @@ def momentum_strategy(values, n, print_log=False):
 
 if __name__ == "__main__":
     # 加载数据
-    values, dates = get_stock_data("518880")
+    values, dates = get_stock_data_sina("sh518880")
     if len(values) > 244:
         values = values[-244:]
         dates = dates[-244:]
@@ -95,10 +101,11 @@ if __name__ == "__main__":
     # 原始策略指标
     ann_ret = annual_return(values)
     mdd = max_drawdown(values)
-    print(
-        f"原始策略:\n年化收益: {ann_ret:.2%} 最大回撤: {mdd:.2%} "
+    metrics_text_0 = (
+        f"原始策略:\n年化收益: {ann_ret:.2%} 最大回撤: {mdd:.2%}\n"
         f"卡玛比率: {-ann_ret / mdd:.2f} 夏普比率: {sharpe(values):.2f}"
     )
+    print(metrics_text_0)
 
     # 优化策略
     best_n, best_calmar = None, -np.inf
@@ -108,6 +115,7 @@ if __name__ == "__main__":
             best_calmar, best_n = metrics[0], n
 
     port, trade_log, metrics = momentum_strategy(values, best_n, True)
+    ann_ret, mdd, calmar_ratio, sharpe_ratio, trade_times, win_rate = metrics
 
     # 准备绘图数据
     buy_dates, buy_prices, sell_dates, sell_prices = [], [], [], []
@@ -136,7 +144,7 @@ if __name__ == "__main__":
         y_axis_label="净值",
         x_axis_type="datetime",
         width=800,
-        height=400,
+        height=350,
     )
 
     line1 = p1.line(
@@ -191,7 +199,7 @@ if __name__ == "__main__":
         y_axis_label="回撤",
         x_axis_type="datetime",
         width=800,
-        height=300,
+        height=250,
     )
 
     varea = p2.varea(
@@ -212,10 +220,34 @@ if __name__ == "__main__":
     # 链接 x 轴
     p2.x_range = p1.x_range
 
-    layout = column(p1, p2)
-    html = file_html(layout, resources=CDN).replace(
-        "https://cdn.bokeh.org/bokeh/release/bokeh-3.8.0.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/bokeh/3.8.0/bokeh.min.js",
+    metrics_text = (
+        f"{metrics_text_0}\nmomentum({best_n}):\n"
+        f"年化收益: {ann_ret:.2%} 最大回撤: {mdd:.2%}\n"
+        f"卡玛比率: {calmar_ratio:.2f} 夏普比率: {sharpe_ratio:.2f}\n"
+        f"交易次数: {trade_times} 胜率: {win_rate:.2%}"
+    )
+    metrics_div = Div(
+        text=metrics_text.replace("\n", "<br>"),
+        width=800,
+        height=100,
+        styles={
+            "font-size": "14px",
+            "font-family": "Helvetica, Arial, sans-serif",
+            "white-space": "pre",
+        },
+    )
+
+    layout = column(p1, p2, metrics_div)
+    html = (
+        file_html(layout, resources=CDN)
+        .replace(
+            "https://cdn.bokeh.org/bokeh/release/bokeh-3.8.0.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/bokeh/3.8.0/bokeh.min.js",
+        )
+        .replace(
+            "display: flow-root;",
+            "display: flex;justify-content: center;",
+        )
     )
 
     with open("momentum.html", "w", encoding="utf-8") as f:
