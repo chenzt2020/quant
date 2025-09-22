@@ -99,7 +99,7 @@ if __name__ == "__main__":
         exit(0)
 
     # 加载数据
-    values, dates = get_stock_data_sina("sh518880")
+    values, dates = get_stock_data("518880")
     if len(values) > 244:
         values = values[-244:]
         dates = dates[-244:]
