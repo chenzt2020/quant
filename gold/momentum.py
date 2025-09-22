@@ -1,12 +1,14 @@
 import akshare as ak
-import pandas as pd
 import numpy as np
+import pandas as pd
 from bokeh.embed import file_html
 from bokeh.layouts import column
 from bokeh.models import CrosshairTool, Div, HoverTool
 from bokeh.plotting import figure
 from bokeh.resources import CDN
+from datetime import datetime
 from pandas_market_calendars import get_calendar
+from zoneinfo import ZoneInfo
 
 
 def get_stock_data(code):
@@ -91,6 +93,11 @@ def momentum_strategy(values, n, print_log=False):
 
 
 if __name__ == "__main__":
+    today = datetime.now(ZoneInfo("Asia/Shanghai")).date()
+    if get_calendar("SSE").schedule(today, today).empty:
+        print(f"非交易日: {today}")
+        exit(0)
+
     # 加载数据
     values, dates = get_stock_data_sina("sh518880")
     if len(values) > 244:
