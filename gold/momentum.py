@@ -5,7 +5,7 @@ from bokeh.embed import file_html
 from bokeh.layouts import column
 from bokeh.models import CrosshairTool, Div, HoverTool
 from bokeh.plotting import figure
-from bokeh.resources import CDN
+from bokeh.resources import Resources
 from datetime import datetime
 from pandas_market_calendars import get_calendar
 from zoneinfo import ZoneInfo
@@ -24,7 +24,7 @@ def get_stock_data_sina(code):
 
 
 def annual_return(v, annual_days=244):
-    return v[-1] ** (annual_days / len(v)) - 1
+    return (v[-1] / v[0]) ** (annual_days / len(v)) - 1
 
 
 def max_drawdown(v):
@@ -90,6 +90,26 @@ def momentum_strategy(values, n, print_log=False):
         trade_log,
         (ann_ret, mdd, calmar_ratio, sharpe_ratio, trade_times, win_rate),
     )
+
+
+def to_html(layout, file):
+    replace_map = [
+        (
+            "https://cdn.bokeh.org/bokeh/release/bokeh-3.8.0.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/bokeh/3.8.0/bokeh.min.js",
+        ),
+        (
+            "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.8.0.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/bokeh/3.8.0/bokeh-widgets.min.js",
+        ),
+        ("display: flow-root;", "display:flex;justify-content:center;"),
+    ]
+    html = file_html(layout, resources=Resources(mode="cdn", version="3.8.0"))
+    for old, new in replace_map:
+        html = html.replace(old, new)
+
+    with open(file, "w", encoding="utf-8") as f:
+        f.write(html)
 
 
 if __name__ == "__main__":
@@ -245,17 +265,4 @@ if __name__ == "__main__":
     )
 
     layout = column(p1, p2, metrics_div)
-    html = (
-        file_html(layout, resources=CDN)
-        .replace(
-            "https://cdn.bokeh.org/bokeh/release/bokeh-3.8.0.min.js",
-            "https://cdnjs.cloudflare.com/ajax/libs/bokeh/3.8.0/bokeh.min.js",
-        )
-        .replace(
-            "display: flow-root;",
-            "display: flex;justify-content: center;",
-        )
-    )
-
-    with open("momentum.html", "w", encoding="utf-8") as f:
-        f.write(html)
+    to_html(layout, "momentum.html")
