@@ -29,10 +29,16 @@ jobs:
       - name: ▶️ 运行脚本
         run: |
           start_time=$(date +%s)
+
           cd gold && uv run python -u momentum.py 2>&1 | tee ../run.log
-          exit_code=${PIPESTATUS[0]}
+          cd ..
+
+          cd index
+          uv run python -u download.py 2>&1 | tee -a ../run.log
+          uv run python -u rotation.py 2>&1 | tee -a ../run.log
+          cd ..
+
           echo "执行时间: $(( $(date +%s) - start_time )) 秒"
-          exit $exit_code
 
       - name: 📤 推送文件到目标仓库
         run: |
@@ -44,11 +50,23 @@ jobs:
           mkdir -p target-repo/html/gold/
           cp gold/momentum.html target-repo/html/gold/
 
+          mkdir -p target-repo/html/index/
+          cp index/rotation.html target-repo/html/index/
+
           cd target-repo
-          git add html/gold/momentum.html
-          git diff --staged --quiet && echo "没有文件变更，跳过提交" || (
-            git commit -m "Update momentum.html - $(date '+%Y-%m-%d %H:%M:%S')"
+          git add html/gold/momentum.html html/index/rotation.html
+          git diff --staged --quiet && echo "没有 HTML 文件变更，跳过提交" || (
+            git commit -m "Update html files - $(date '+%Y-%m-%d %H:%M:%S')"
             git push https://${{ secrets.TARGET_REPO_TOKEN }}@github.com/chenzt2020/chenzt2020.github.io.git
+          )
+          cd ..
+
+      - name: 📤 推送数据文件到本仓库
+        run: |
+          git add data/index/*.csv
+          git diff --staged --quiet && echo "没有数据文件变更，跳过提交" || (
+            git commit -m "Update index data - $(date '+%Y-%m-%d %H:%M:%S')"
+            git push
           )
 
       - name: 🚚 上传运行日志

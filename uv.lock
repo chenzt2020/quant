@@ -144,7 +144,7 @@ wheels = [
 
 [[package]]
 name = "akshare"
-version = "1.17.54"
+version = "1.17.55"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -165,9 +165,9 @@ dependencies = [
     { name = "urllib3" },
     { name = "xlrd" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5c/f7/5f0bf7181cc29a18faea775b00ddadb8e049e86a839b006a71988afe5b16/akshare-1.17.54.tar.gz", hash = "sha256:d22433fb9595fdce79b3f58b5d0a32ea1e5f7fc9d511113c9bdc882a347e75c9", size = 844581, upload-time = "2025-09-20T10:24:49.568Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/86/c52c474725a4852a5d9df0ae0d573e26424644a8ac4f6f4887cc814d64fd/akshare-1.17.55.tar.gz", hash = "sha256:912a8bdb3bad441d27af16d95ba8168946261c0270fdeac8e3ce0c7e1c25cd16", size = 848070, upload-time = "2025-09-24T07:29:41.401Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/85/09/be10f458ba1444de88dc1bd3f892b83f35aac28fcea0b9767c6270e0a228/akshare-1.17.54-py3-none-any.whl", hash = "sha256:0f10c12f75b0a15b72b8fe91c2890ceafa639aa6012980e49614eaa8d370d770", size = 1061905, upload-time = "2025-09-20T10:24:47.943Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/9f/d6fa9c3e2b5b9d704f52b0ee4d6546840504629cc049a53c984bee4fbb37/akshare-1.17.55-py3-none-any.whl", hash = "sha256:294fa30c94ed8576f49680342c6cae66811f47ce6d3d3f16e8d59afaeddc2d39", size = 1065947, upload-time = "2025-09-24T07:29:39.737Z" },
 ]
 
 [[package]]
