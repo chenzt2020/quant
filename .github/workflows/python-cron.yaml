@@ -18,10 +18,8 @@ jobs:
       - name: 🚀 安装 uv
         uses: astral-sh/setup-uv@v6
         with:
+          python-version: 3.12
           enable-cache: true
-
-      - name: 🐍 设置 Python 环境
-        run: uv python install 3.11
 
       - name: 📦 安装依赖
         run: uv sync --frozen
