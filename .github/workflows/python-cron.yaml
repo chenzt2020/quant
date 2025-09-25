@@ -2,7 +2,7 @@ name: Python 脚本定时任务
 
 on:
   schedule:
-    - cron: "1 7 * * *"
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 jobs:
@@ -30,13 +30,12 @@ jobs:
         run: |
           start_time=$(date +%s)
 
-          cd gold && uv run python -u momentum.py 2>&1 | tee ../run.log
-          cd ..
+          echo "--- Running gold/momentum.py ---"
+          uv run python -u gold/momentum.py 2>&1 | tee run.log
 
-          cd index
-          uv run python -u download.py 2>&1 | tee -a ../run.log
-          uv run python -u rotation.py 2>&1 | tee -a ../run.log
-          cd ..
+          echo "--- Running index/download.py and index/rotation.py ---"
+          uv run python -u index/download.py 2>&1 | tee -a run.log
+          uv run python -u index/rotation.py 2>&1 | tee -a run.log
 
           echo "执行时间: $(( $(date +%s) - start_time )) 秒"
 
@@ -73,5 +72,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: quant-gold-output-${{ github.run_id }}
+          name: quant-output-${{ github.run_id }}
           path: run.log

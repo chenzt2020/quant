@@ -145,4 +145,4 @@ if __name__ == "__main__":
 
     p.legend.location = "top_left"
 
-    to_html(p, "rotation.html")
+    to_html(p, "index/rotation.html")
