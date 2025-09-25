@@ -32,6 +32,7 @@ jobs:
           uv run python -u gold/momentum.py 2>&1 | tee run.log
 
           echo "--- Running index/download.py and index/rotation.py ---"
+          mkdir -p data/index
           uv run python -u index/download.py 2>&1 | tee -a run.log
           uv run python -u index/rotation.py 2>&1 | tee -a run.log
 

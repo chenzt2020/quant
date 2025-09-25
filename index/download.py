@@ -29,7 +29,7 @@ for code in index_list:
         start_date = str(saved_index_map[code]["date"].max())
         if start_date >= end_date:
             continue
-    new_index_map[code] = ak.stock_zh_index_daily(symbol=code)
+    new_index_map[code] = ak.stock_zh_index_daily_em(symbol=code)
     print(code)
 
 for code, df in new_index_map.items():
