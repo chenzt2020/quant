@@ -1,6 +1,14 @@
 import glob
 import akshare as ak
 import pandas as pd
+from datetime import datetime
+from pandas_market_calendars import get_calendar
+from zoneinfo import ZoneInfo
+
+today = datetime.now(ZoneInfo("Asia/Shanghai")).date()
+if get_calendar("SSE").schedule(today, today).empty:
+    print(f"非交易日: {today}")
+    exit(0)
 
 index_list = [
     "sh000001",  # 上证指数

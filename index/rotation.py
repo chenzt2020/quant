@@ -3,7 +3,9 @@ import numpy as np
 from pprint import pprint
 from bokeh.plotting import figure
 from bokeh.models import HoverTool, ColumnDataSource
+from datetime import datetime
 from pandas_market_calendars import get_calendar
+from zoneinfo import ZoneInfo
 import sys
 import os
 
@@ -88,6 +90,11 @@ def performance(v, days, annual_days=365):
 
 
 if __name__ == "__main__":
+    today = datetime.now(ZoneInfo("Asia/Shanghai")).date()
+    if get_calendar("SSE").schedule(today, today).empty:
+        print(f"非交易日: {today}")
+        exit(0)
+
     all_index_df, start_date, end_date = preprocess()
 
     best_n = 1
