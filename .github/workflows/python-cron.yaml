@@ -48,10 +48,19 @@ jobs:
           git clone --depth 1 https://github.com/chenzt2020/chenzt2020.github.io.git target-repo
 
           mkdir -p target-repo/html/gold/
-          cp gold/momentum.html target-repo/html/gold/
-
           mkdir -p target-repo/html/index/
-          cp index/rotation.html target-repo/html/index/
+
+          if [ -f gold/momentum.html ]; then
+            cp -v gold/momentum.html target-repo/html/gold/
+          else
+            echo "gold/momentum.html 不存在，跳过复制"
+          fi
+
+          if [ -f index/rotation.html ]; then
+            cp -v index/rotation.html target-repo/html/index/
+          else
+            echo "index/rotation.html 不存在，跳过复制"
+          fi
 
           cd target-repo
           git add html/gold/momentum.html html/index/rotation.html

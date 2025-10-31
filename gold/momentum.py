@@ -119,7 +119,15 @@ if __name__ == "__main__":
         exit(0)
 
     # 加载数据
-    values, dates = get_stock_data("518880")
+    values = None
+    for _ in range(3):
+        try:
+            values, dates = get_stock_data("518880")
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+    if values is None:
+        exit()
     if len(values) > 244:
         values = values[-244:]
         dates = dates[-244:]
